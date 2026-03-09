@@ -10,6 +10,7 @@
 
         public bool IsActive { get; set; } = true;
 
+        public string ImageUrl { get; set; } = "/images/movies/default.jpg";
         public ICollection<Projection> Projections { get; set; } = new List<Projection>();
     }
 }

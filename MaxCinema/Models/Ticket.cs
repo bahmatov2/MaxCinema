@@ -2,6 +2,7 @@
 {
     public class Ticket
     {
+        public int Id { get; set; }
         public int ProjectionId { get; set; }
         public Projection Projection { get; set; } = null!;
 

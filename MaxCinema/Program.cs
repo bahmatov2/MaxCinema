@@ -1,4 +1,5 @@
 using MaxCinema.Data;
+using MaxCinema.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,11 +11,21 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.SignIn.RequireConfirmedAccount = false;
+})
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+using (var service = app.Services.CreateScope())
+{
+    await DbSeeder.SeedRolesAndAdminAsync(service.ServiceProvider);
+}
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -30,9 +41,9 @@ else
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
+app.UseAuthentication(); //вдасд
 app.UseAuthorization();
-
+    
 app.MapStaticAssets();
 
 app.MapControllerRoute(

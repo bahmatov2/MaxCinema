@@ -1,0 +1,48 @@
+﻿@model IEnumerable<MaxCinema.Models.Movie>
+
+@{
+    ViewData["Title"] = "Филми";
+}
+
+<h1>Филми</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Добави нов филм</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Заглавие</th>
+            <th>Жанр</th>
+            <th>Продължителност</th>
+            <th>Активен</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>@item.Genre</td>
+                <td>@item.DurationMinutes минути</td>
+                <td>
+                    @if (item.IsActive)
+                    {
+                        <span class="badge bg-success">Активен</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Неактивен</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редактирай</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Детайли</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Изтрий</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

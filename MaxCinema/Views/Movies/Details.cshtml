@@ -1,0 +1,47 @@
+﻿@model MaxCinema.Models.Movie
+
+@{
+    ViewData["Title"] = "Детайли за филм";
+}
+
+<h1>Детайли за филм</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h3>@Model.Title</h3>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Заглавие</dt>
+            <dd class="col-sm-9">@Model.Title</dd>
+
+            <dt class="col-sm-3">Жанр</dt>
+            <dd class="col-sm-9">@Model.Genre</dd>
+
+            <dt class="col-sm-3">Описание</dt>
+            <dd class="col-sm-9">@Model.Description</dd>
+
+            <dt class="col-sm-3">Продължителност</dt>
+            <dd class="col-sm-9">@Model.DurationMinutes минути</dd>
+
+            <dt class="col-sm-3">URL на снимка</dt>
+            <dd class="col-sm-9">@Model.ImageUrl</dd>
+
+            <dt class="col-sm-3">Активен</dt>
+            <dd class="col-sm-9">
+                @if (Model.IsActive)
+                {
+                    <span class="badge bg-success">Да</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">Не</span>
+                }
+            </dd>
+        </dl>
+    </div>
+    <div class="card-footer">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Редактирай</a>
+        <a asp-action="Index" class="btn btn-secondary">Назад</a>
+    </div>
+</div>

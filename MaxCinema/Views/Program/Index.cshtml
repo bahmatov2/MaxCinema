@@ -1,0 +1,46 @@
+﻿@model IEnumerable<MaxCinema.Models.Projection>
+
+@{
+    ViewData["Title"] = "Програма";
+}
+
+<h1>Филмова програма</h1>
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                @if (!string.IsNullOrEmpty(item.Movie?.ImageUrl))
+                {
+                    <img src="@item.Movie.ImageUrl" class="card-img-top" alt="@item.Movie.Title" style="height: 200px; object-fit: cover;">
+                }
+                else
+                {
+                    <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-film fa-3x"></i>
+                    </div>
+                }
+                <div class="card-body">
+                    <h5 class="card-title">@item.Movie?.Title</h5>
+                    <p class="card-text">
+                        <strong>Начало:</strong> @item.StartTime.ToString("dd.MM.yyyy HH:mm")<br />
+                        <strong>Зала:</strong> @item.Hall?.Name<br />
+                        <strong>Цена:</strong> @item.TicketPrice.ToString("C")
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary w-100">Детайли</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <h4>Няма предстоящи прожекции</h4>
+        <p>Заповядайте отново по-късно!</p>
+    </div>
+}

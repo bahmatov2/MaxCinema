@@ -1,0 +1,37 @@
+﻿@model MaxCinema.Models.Projection
+
+@{
+    ViewData["Title"] = "Детайли за прожекция";
+}
+
+<h1>Детайли за прожекция</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h3>@Model.Movie?.Title</h3>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Филм:</dt>
+            <dd class="col-sm-9">@Model.Movie?.Title</dd>
+
+            <dt class="col-sm-3">Жанр:</dt>
+            <dd class="col-sm-9">@Model.Movie?.Genre</dd>
+
+            <dt class="col-sm-3">Продължителност:</dt>
+            <dd class="col-sm-9">@Model.Movie?.DurationMinutes минути</dd>
+
+            <dt class="col-sm-3">Зала:</dt>
+            <dd class="col-sm-9">@Model.Hall?.Name</dd>
+
+            <dt class="col-sm-3">Начало:</dt>
+            <dd class="col-sm-9">@Model.StartTime.ToString("dd.MM.yyyy HH:mm")</dd>
+
+            <dt class="col-sm-3">Цена:</dt>
+            <dd class="col-sm-9">@Model.TicketPrice.ToString("C")</dd>
+        </dl>
+    </div>
+    <div class="card-footer">
+        <a asp-action="Index" class="btn btn-secondary">Назад към програмата</a>
+    </div>
+</div>

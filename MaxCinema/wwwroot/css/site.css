@@ -29,3 +29,83 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+
+:root {
+    --cinema-orange: #f15a24; 
+    --cinema-dark: #333333;
+    --cinema-light: #f8f9fa;
+}
+
+/* Промяна на навигационната лента */
+.navbar {
+    background-color: var(--cinema-orange) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    color: white !important;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.navbar-nav .nav-link {
+    color: white !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.3s ease;
+}
+
+    .navbar-nav .nav-link:hover {
+        background-color: rgba(255,255,255,0.2);
+        border-radius: 4px;
+    }
+
+/* Бутони за вход/регистрация */
+.navbar-nav .nav-item:last-child .nav-link,
+.navbar-nav .nav-item:last-child .nav-link {
+    background-color: white;
+    color: var(--cinema-orange) !important;
+    border-radius: 20px;
+    margin-left: 10px;
+    padding: 0.5rem 1.5rem !important;
+}
+
+    .navbar-nav .nav-item:last-child .nav-link:hover {
+        background-color: #f8f9fa;
+        color: var(--cinema-orange) !important;
+    }
+
+/* Footer */
+.footer {
+    background-color: var(--cinema-dark);
+    color: white;
+    padding: 20px 0;
+    margin-top: 50px;
+}
+
+    .footer a {
+        color: var(--cinema-orange);
+    }
+
+/* Бутони */
+.btn-primary {
+    background-color: var(--cinema-orange);
+    border-color: var(--cinema-orange);
+}
+
+    .btn-primary:hover {
+        background-color: #d44a1f;
+        border-color: #d44a1f;
+    }
+
+.btn-outline-primary {
+    color: var(--cinema-orange);
+    border-color: var(--cinema-orange);
+}
+
+    .btn-outline-primary:hover {
+        background-color: var(--cinema-orange);
+        border-color: var(--cinema-orange);
+        color: white;
+    }

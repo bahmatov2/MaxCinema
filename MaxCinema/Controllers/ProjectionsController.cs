@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MaxCinema.Data;
 using MaxCinema.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MaxCinema.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ProjectionsController : Controller
     {
         private readonly ApplicationDbContext _context;

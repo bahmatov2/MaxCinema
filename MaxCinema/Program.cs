@@ -76,4 +76,73 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        await CreateAdminUserAsync(services);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Грешка при създаване на admin потребител.");
+    }
+}
+
+app.Run();
+
+// Добавете този метод в края на файла:
+async Task CreateAdminUserAsync(IServiceProvider services)
+{
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+    // 1. Създаване на Admin роля
+    string[] roles = new[] { "Admin", "Customer" };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+
+    // 2. Създаване на Admin потребител
+    var adminEmail = "adminM@Maxcinema.com";
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+    if (adminUser == null)
+    {
+        adminUser = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            FirstName = "Admin",
+            LastName = "User",
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(adminUser, "Admin123!");
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+            Console.WriteLine("✅ Admin потребителят е създаден успешно!");
+        }
+        else
+        {
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine($"❌ Грешка: {error.Description}");
+            }
+        }
+    }
+    else
+    {
+        Console.WriteLine("ℹ️ Admin потребителят вече съществува.");
+    }
+}
+
 app.Run();

@@ -5,9 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-
+using Microsoft.AspNetCore.Authorization;
 namespace MaxCinema.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class MoviesController : Controller
     {
         private readonly ApplicationDbContext _context;

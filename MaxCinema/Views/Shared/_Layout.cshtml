@@ -40,7 +40,17 @@
                             </a>
                         </li>
 
-                        <!-- САМО ЗА АДМИНИ - Филми, Зали, Билети -->
+                        <!-- Моите билети - винаги за логнати потребители -->
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Tickets" asp-action="MyTickets">
+                                    <i class="fas fa-ticket-alt"></i> Моите билети
+                                </a>
+                            </li>
+                        }
+
+                        <!-- САМО ЗА АДМИНИ - Филми, Зали, Билети, Проекции -->
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
@@ -55,12 +65,12 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Tickets" asp-action="Index">
-                                    <i class="fas fa-ticket-alt"></i> Билети
+                                    <i class="fas fa-ticket-alt"></i> Всички билети
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Projections" asp-action="Index">
-                                    <i class="fas fa-clock"></i> Проекции
+                                    <i class="fas fa-clock"></i> Прожекции
                                 </a>
                             </li>
                         }
@@ -100,19 +110,3 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-@if (User.Identity.IsAuthenticated)
-{
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Tickets" asp-action="MyTickets">
-            <i class="fas fa-ticket-alt"></i> Моите билети
-        </a>
-    </li>
-}
-@if (User.IsInRole("Admin"))
-{
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Tickets" asp-action="Index">
-            <i class="fas fa-ticket-alt"></i> Билети
-        </a>
-    </li>
-}

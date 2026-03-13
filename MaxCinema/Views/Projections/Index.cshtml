@@ -27,7 +27,7 @@
                 <td>@item.Movie?.Title</td>
                 <td>@item.Hall?.Name</td>
                 <td>@item.StartTime.ToString("dd.MM.yyyy HH:mm")</td>
-                <td>@item.TicketPrice.ToString("F2") €</td>  <!-- ← ПРОМЕНЕНО ТУК -->
+                <td>@item.TicketPrice.ToString("F2") €</td>  
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Редактирай</a>
                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Детайли</a>

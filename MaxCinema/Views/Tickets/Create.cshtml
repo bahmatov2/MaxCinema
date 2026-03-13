@@ -1,69 +1,48 @@
-﻿[Authorize]
-public IActionResult Create(int? projectionId)
-{
-    // Диагностика
-    Console.WriteLine("=== Create method started ===");
-    Console.WriteLine($"ProjectionId received: {projectionId}");
+﻿@model MaxCinema.Models.Ticket
 
-    if (projectionId == null)
-    {
-        Console.WriteLine("ERROR: projectionId is null");
-        return NotFound();
-    }
-
-    var projection = _context.Projections
-        .Include(p => p.Movie)
-        .Include(p => p.Hall)
-        .Include(p => p.Tickets)
-        .FirstOrDefault(p => p.Id == projectionId);
-
-    if (projection == null)
-    {
-        Console.WriteLine($"ERROR: Projection with ID {projectionId} not found");
-        return NotFound();
-    }
-
-    Console.WriteLine($"Projection found: {projection.Movie?.Title}, Hall: {projection.Hall?.Name}");
-
-    // Проверка за бъдеща дата
-    if (projection.StartTime <= DateTime.Now)
-    {
-        Console.WriteLine("ERROR: Projection is in the past");
-        TempData["Error"] = "Не можете да купувате билети за минали прожекции.";
-        return RedirectToAction("Index", "Program");
-    }
-
-    // Намираме свободните места
-    var takenSeatIds = projection.Tickets.Select(t => t.SeatId).ToList();
-    Console.WriteLine($"Taken seats: {takenSeatIds.Count}");
-
-    var freeSeats = _context.Seats
-        .Where(s => s.HallId == projection.HallId && !takenSeatIds.Contains(s.Id))
-        .Select(s => new {
-            Id = s.Id,
-            DisplayName = $"Ред {s.Row}, Място {s.Number}"
-        })
-        .ToList();
-
-    Console.WriteLine($"Free seats found: {freeSeats.Count}");
-
-    if (!freeSeats.Any())
-    {
-        Console.WriteLine("ERROR: No free seats available");
-        TempData["Error"] = "Няма свободни места за тази прожекция.";
-        return RedirectToAction("Index", "Program");
-    }
-
-    ViewBag.Projection = projection;
-    ViewBag.FreeSeats = new SelectList(freeSeats, "Id", "DisplayName");
-
-    var ticket = new Ticket
-    {
-        ProjectionId = projection.Id,
-        PricePaid = projection.TicketPrice,
-        PurchasedAt = DateTime.Now
-    };
-
-    Console.WriteLine("=== Create method completed successfully ===");
-    return View(ticket);
+@{
+    ViewData["Title"] = "Купи билет";
+    var projection = ViewBag.Projection as MaxCinema.Models.Projection;
 }
+
+<h1>Купи билет за @projection?.Movie?.Title</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <!-- Информация за прожекцията -->
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h4>Информация за прожекцията</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>🎬 Филм:</strong> @projection?.Movie?.Title</p>
+                <p><strong>🏢 Зала:</strong> @projection?.Hall?.Name</p>
+                <p><strong>📅 Начало:</strong> @projection?.StartTime.ToString("dd.MM.yyyy HH:mm")</p>
+                <p><strong>💰 Цена:</strong> @projection?.TicketPrice.ToString("F2") €</p>
+            </div>
+        </div>
+
+        <!-- Форма за избор на място -->
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4>Избор на място</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <input type="hidden" asp-for="ProjectionId" />
+                    <input type="hidden" asp-for="PricePaid" />
+
+                    <div class="form-group mb-3">
+                        <label asp-for="SeatId" class="control-label">Избери място</label>
+                        <select asp-for="SeatId" class="form-control" asp-items="ViewBag.FreeSeats">
+                            <option value="">-- Изберете място --</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">Купи билет</button>
+                    <a asp-controller="Program" asp-action="Index" class="btn btn-secondary">Назад</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

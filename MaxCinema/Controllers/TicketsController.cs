@@ -62,13 +62,8 @@ namespace MaxCinema.Controllers
         [Authorize]
         public IActionResult Create(int? projectionId)
         {
-            // Диагностика в Output прозореца
-            System.Diagnostics.Debug.WriteLine("=== Create GET method started ===");
-            System.Diagnostics.Debug.WriteLine($"ProjectionId received: {projectionId}");
-
             if (projectionId == null)
             {
-                System.Diagnostics.Debug.WriteLine("ERROR: projectionId is null");
                 return NotFound();
             }
 
@@ -80,24 +75,18 @@ namespace MaxCinema.Controllers
 
             if (projection == null)
             {
-                System.Diagnostics.Debug.WriteLine($"ERROR: Projection with ID {projectionId} not found");
                 return NotFound();
             }
-
-            System.Diagnostics.Debug.WriteLine($"Projection found: {projection.Movie?.Title}, Start: {projection.StartTime}, Now: {DateTime.Now}");
 
             // Проверка дали прожекцията е в бъдещето
             if (projection.StartTime <= DateTime.Now)
             {
-                System.Diagnostics.Debug.WriteLine("ERROR: Projection is in the past");
                 TempData["Error"] = "Не можете да купувате билети за минали прожекции.";
                 return RedirectToAction("Index", "Program");
             }
 
             // Намираме свободните места
             var takenSeatIds = projection.Tickets.Select(t => t.SeatId).ToList();
-            System.Diagnostics.Debug.WriteLine($"Taken seats: {takenSeatIds.Count}");
-
             var freeSeats = _context.Seats
                 .Where(s => s.HallId == projection.HallId && !takenSeatIds.Contains(s.Id))
                 .Select(s => new {
@@ -106,11 +95,8 @@ namespace MaxCinema.Controllers
                 })
                 .ToList();
 
-            System.Diagnostics.Debug.WriteLine($"Free seats found: {freeSeats.Count}");
-
             if (!freeSeats.Any())
             {
-                System.Diagnostics.Debug.WriteLine("ERROR: No free seats available");
                 TempData["Error"] = "Няма свободни места за тази прожекция.";
                 return RedirectToAction("Index", "Program");
             }
@@ -125,7 +111,6 @@ namespace MaxCinema.Controllers
                 PurchasedAt = DateTime.Now
             };
 
-            System.Diagnostics.Debug.WriteLine("=== Create GET method completed successfully ===");
             return View(ticket);
         }
 

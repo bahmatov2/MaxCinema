@@ -100,3 +100,19 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+@if (User.Identity.IsAuthenticated)
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Tickets" asp-action="MyTickets">
+            <i class="fas fa-ticket-alt"></i> Моите билети
+        </a>
+    </li>
+}
+@if (User.IsInRole("Admin"))
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Tickets" asp-action="Index">
+            <i class="fas fa-ticket-alt"></i> Билети
+        </a>
+    </li>
+}

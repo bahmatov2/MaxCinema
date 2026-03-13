@@ -1,46 +1,54 @@
 ﻿@model MaxCinema.Models.Projection
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Създаване на прожекция";
 }
 
-<h1>Create</h1>
+<h1>Създаване на нова прожекция</h1>
 
-<h4>Projection</h4>
-<hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="MovieId" class="control-label"></label>
-                <select asp-for="MovieId" class ="form-control" asp-items="ViewBag.MovieId"></select>
+
+            <div class="form-group mb-3">
+                <label asp-for="MovieId" class="control-label">Филм</label>
+                <select asp-for="MovieId" class="form-control" asp-items="ViewBag.MovieId" required>
+                    <option value="">-- Изберете филм --</option>
+                </select>
+                <span asp-validation-for="MovieId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="HallId" class="control-label"></label>
-                <select asp-for="HallId" class ="form-control" asp-items="ViewBag.HallId"></select>
+
+            <div class="form-group mb-3">
+                <label asp-for="HallId" class="control-label">Зала</label>
+                <select asp-for="HallId" class="form-control" asp-items="ViewBag.HallId" required>
+                    <option value="">-- Изберете зала --</option>
+                </select>
+                <span asp-validation-for="HallId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="StartTime" class="control-label"></label>
-                <input asp-for="StartTime" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="StartTime" class="control-label">Начален час</label>
+                <input asp-for="StartTime" class="form-control" type="datetime-local" required />
                 <span asp-validation-for="StartTime" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="TicketPrice" class="control-label"></label>
-                <input asp-for="TicketPrice" class="form-control" />
+
+            <div class="form-group mb-3">
+                <label asp-for="TicketPrice" class="control-label">Цена на билет (€.)</label>
+                <input asp-for="TicketPrice" class="form-control" type="number" step="0.01" min="0" required />
                 <span asp-validation-for="TicketPrice" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Създай" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Назад</a>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

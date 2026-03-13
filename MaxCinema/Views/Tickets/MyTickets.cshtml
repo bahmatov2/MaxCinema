@@ -1,0 +1,45 @@
+﻿@model IEnumerable<MaxCinema.Models.Ticket>
+
+@{
+    ViewData["Title"] = "Моите билети";
+}
+
+<h1>Моите билети</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <h4>Нямате закупени билети</h4>
+        <p>Отидете в <a asp-controller="Program" asp-action="Index">програмата</a> за да изберете прожекция.</p>
+    </div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Филм</th>
+                <th>Зала</th>
+                <th>Начало</th>
+                <th>Ред</th>
+                <th>Място</th>
+                <th>Цена</th>
+                <th>Закупен на</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Projection?.Movie?.Title</td>
+                    <td>@item.Projection?.Hall?.Name</td>
+                    <td>@item.Projection?.StartTime.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@item.Seat?.Row</td>
+                    <td>@item.Seat?.Number</td>
+                    <td>@item.PricePaid.ToString("F2") €</td>
+                    <td>@item.PurchasedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

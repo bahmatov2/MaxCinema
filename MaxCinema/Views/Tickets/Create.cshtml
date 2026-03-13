@@ -1,50 +1,69 @@
-﻿@model MaxCinema.Models.Ticket
+﻿[Authorize]
+public IActionResult Create(int? projectionId)
+{
+    // Диагностика
+    Console.WriteLine("=== Create method started ===");
+    Console.WriteLine($"ProjectionId received: {projectionId}");
 
-@{
-    ViewData["Title"] = "Create";
-}
+    if (projectionId == null)
+    {
+        Console.WriteLine("ERROR: projectionId is null");
+        return NotFound();
+    }
 
-<h1>Create</h1>
+    var projection = _context.Projections
+        .Include(p => p.Movie)
+        .Include(p => p.Hall)
+        .Include(p => p.Tickets)
+        .FirstOrDefault(p => p.Id == projectionId);
 
-<h4>Ticket</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="ProjectionId" class="control-label"></label>
-                <select asp-for="ProjectionId" class ="form-control" asp-items="ViewBag.ProjectionId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="SeatId" class="control-label"></label>
-                <select asp-for="SeatId" class ="form-control" asp-items="ViewBag.SeatId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class ="form-control" asp-items="ViewBag.UserId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="PricePaid" class="control-label"></label>
-                <input asp-for="PricePaid" class="form-control" />
-                <span asp-validation-for="PricePaid" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PurchasedAt" class="control-label"></label>
-                <input asp-for="PurchasedAt" class="form-control" />
-                <span asp-validation-for="PurchasedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+    if (projection == null)
+    {
+        Console.WriteLine($"ERROR: Projection with ID {projectionId} not found");
+        return NotFound();
+    }
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+    Console.WriteLine($"Projection found: {projection.Movie?.Title}, Hall: {projection.Hall?.Name}");
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    // Проверка за бъдеща дата
+    if (projection.StartTime <= DateTime.Now)
+    {
+        Console.WriteLine("ERROR: Projection is in the past");
+        TempData["Error"] = "Не можете да купувате билети за минали прожекции.";
+        return RedirectToAction("Index", "Program");
+    }
+
+    // Намираме свободните места
+    var takenSeatIds = projection.Tickets.Select(t => t.SeatId).ToList();
+    Console.WriteLine($"Taken seats: {takenSeatIds.Count}");
+
+    var freeSeats = _context.Seats
+        .Where(s => s.HallId == projection.HallId && !takenSeatIds.Contains(s.Id))
+        .Select(s => new {
+            Id = s.Id,
+            DisplayName = $"Ред {s.Row}, Място {s.Number}"
+        })
+        .ToList();
+
+    Console.WriteLine($"Free seats found: {freeSeats.Count}");
+
+    if (!freeSeats.Any())
+    {
+        Console.WriteLine("ERROR: No free seats available");
+        TempData["Error"] = "Няма свободни места за тази прожекция.";
+        return RedirectToAction("Index", "Program");
+    }
+
+    ViewBag.Projection = projection;
+    ViewBag.FreeSeats = new SelectList(freeSeats, "Id", "DisplayName");
+
+    var ticket = new Ticket
+    {
+        ProjectionId = projection.Id,
+        PricePaid = projection.TicketPrice,
+        PurchasedAt = DateTime.Now
+    };
+
+    Console.WriteLine("=== Create method completed successfully ===");
+    return View(ticket);
 }

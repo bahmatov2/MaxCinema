@@ -22,15 +22,42 @@
                     </div>
                 }
                 <div class="card-body">
-                    <h5 class="card-title">@item.Movie?.Title</h5>
+                    <h5 class="card-title text-primary">@item.Movie?.Title</h5>
                     <p class="card-text">
+                        <i class="fas fa-calendar-alt text-warning"></i>
                         <strong>Начало:</strong> @item.StartTime.ToString("dd.MM.yyyy HH:mm")<br />
+
+                        <i class="fas fa-chair text-info"></i>
                         <strong>Зала:</strong> @item.Hall?.Name<br />
-                        <strong>Цена:</strong> @item.TicketPrice.ToString("C")
+
+                        <i class="fas fa-ticket-alt text-success"></i>
+                        <strong>Цена:</strong> @item.TicketPrice.ToString("F2") €
                     </p>
                 </div>
-                <div class="card-footer">
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary w-100">Детайли</a>
+                <div class="card-footer bg-white">
+                    <div class="d-grid gap-2">
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary">
+                            <i class="fas fa-info-circle"></i> Детайли
+                        </a>
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <a asp-controller="Tickets"
+                               asp-action="Create"
+                               asp-route-projectionId="@item.Id"
+                               class="btn btn-success">
+                                Купи билет
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-area="Identity"
+                               asp-page="/Account/Login"
+                               class="btn btn-outline-primary">
+                                <i class="fas fa-sign-in-alt"></i> Влезте, за да купите
+                            </a>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
@@ -39,7 +66,8 @@
 
 @if (!Model.Any())
 {
-    <div class="alert alert-info">
+    <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle fa-2x"></i>
         <h4>Няма предстоящи прожекции</h4>
         <p>Заповядайте отново по-късно!</p>
     </div>

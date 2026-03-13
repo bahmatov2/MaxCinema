@@ -21,14 +21,18 @@ namespace MaxCinema.Controllers
             _context = context;
         }
 
-        // GET: Projections
+        // GET: Projections - ПОПРАВЕНО: вече включва Movie и Hall
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Projections.Include(p => p.Hall).Include(p => p.Movie);
-            return View(await applicationDbContext.ToListAsync());
+            var projections = _context.Projections
+                .Include(p => p.Movie)      // <- ТОВА Е ВАЖНОТО! Зарежда името на филма
+                .Include(p => p.Hall)       // <- ТОВА Е ВАЖНОТО! Зарежда името на залата
+                .ToListAsync();
+
+            return View(await projections);
         }
 
-        // GET: Projections/Details/5
+        // GET: Projections/Details/5 - ПОПРАВЕНО: вече включва Movie и Hall
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -37,9 +41,10 @@ namespace MaxCinema.Controllers
             }
 
             var projection = await _context.Projections
-                .Include(p => p.Hall)
-                .Include(p => p.Movie)
+                .Include(p => p.Movie)      // <- ТОВА Е ВАЖНОТО!
+                .Include(p => p.Hall)       // <- ТОВА Е ВАЖНОТО!
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (projection == null)
             {
                 return NotFound();
@@ -51,26 +56,26 @@ namespace MaxCinema.Controllers
         // GET: Projections/Create
         public IActionResult Create()
         {
-            ViewData["HallId"] = new SelectList(_context.Halls, "Id", "Id");
-            ViewData["MovieId"] = new SelectList(_context.Movies, "Id", "Id");
+            ViewData["HallId"] = new SelectList(_context.Halls, "Id", "Name");      // <- Name, не Id
+            ViewData["MovieId"] = new SelectList(_context.Movies, "Id", "Title");   // <- Title, не Id
             return View();
         }
 
         // POST: Projections/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,MovieId,HallId,StartTime,TicketPrice")] Projection projection)
         {
-            if (ModelState.IsValid)
+            // Проста валидация
+            if (projection.MovieId > 0 && projection.HallId > 0 && projection.TicketPrice > 0)
             {
                 _context.Add(projection);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["HallId"] = new SelectList(_context.Halls, "Id", "Id", projection.HallId);
-            ViewData["MovieId"] = new SelectList(_context.Movies, "Id", "Id", projection.MovieId);
+
+            ViewData["HallId"] = new SelectList(_context.Halls, "Id", "Name", projection.HallId);
+            ViewData["MovieId"] = new SelectList(_context.Movies, "Id", "Title", projection.MovieId);
             return View(projection);
         }
 
@@ -87,14 +92,13 @@ namespace MaxCinema.Controllers
             {
                 return NotFound();
             }
-            ViewData["HallId"] = new SelectList(_context.Halls, "Id", "Id", projection.HallId);
-            ViewData["MovieId"] = new SelectList(_context.Movies, "Id", "Id", projection.MovieId);
+
+            ViewData["HallId"] = new SelectList(_context.Halls, "Id", "Name", projection.HallId);
+            ViewData["MovieId"] = new SelectList(_context.Movies, "Id", "Title", projection.MovieId);
             return View(projection);
         }
 
         // POST: Projections/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,MovieId,HallId,StartTime,TicketPrice")] Projection projection)
@@ -104,7 +108,7 @@ namespace MaxCinema.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (projection.MovieId > 0 && projection.HallId > 0 && projection.TicketPrice > 0)
             {
                 try
                 {
@@ -124,8 +128,9 @@ namespace MaxCinema.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["HallId"] = new SelectList(_context.Halls, "Id", "Id", projection.HallId);
-            ViewData["MovieId"] = new SelectList(_context.Movies, "Id", "Id", projection.MovieId);
+
+            ViewData["HallId"] = new SelectList(_context.Halls, "Id", "Name", projection.HallId);
+            ViewData["MovieId"] = new SelectList(_context.Movies, "Id", "Title", projection.MovieId);
             return View(projection);
         }
 
@@ -141,6 +146,7 @@ namespace MaxCinema.Controllers
                 .Include(p => p.Hall)
                 .Include(p => p.Movie)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (projection == null)
             {
                 return NotFound();

@@ -13,6 +13,6 @@ namespace MaxCinema.Models
         public DateTime StartTime { get; set; }
         public decimal TicketPrice { get; set; }
 
-        public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
+        public ICollection<Ticket>? Tickets { get; set; } = new List<Ticket>();
     }
 }

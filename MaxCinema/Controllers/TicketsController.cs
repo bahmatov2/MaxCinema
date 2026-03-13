@@ -62,56 +62,72 @@ namespace MaxCinema.Controllers
         [Authorize]
         public IActionResult Create(int? projectionId)
         {
-            if (projectionId == null)
+            try
             {
-                return NotFound();
+                // 1. Проверка за null
+                if (projectionId == null)
+                {
+                    TempData["Error"] = "Не е избрана прожекция.";
+                    return RedirectToAction("Index", "Program");
+                }
+
+                // 2. Зареждане на прожекцията
+                var projection = _context.Projections
+                    .Include(p => p.Movie)
+                    .Include(p => p.Hall)
+                    .Include(p => p.Tickets)
+                    .FirstOrDefault(p => p.Id == projectionId);
+
+                if (projection == null)
+                {
+                    TempData["Error"] = "Прожекцията не съществува.";
+                    return RedirectToAction("Index", "Program");
+                }
+
+                // 3. Проверка за минала дата
+                if (projection.StartTime <= DateTime.Now)
+                {
+                    TempData["Error"] = "Не можете да купувате билети за минали прожекции.";
+                    return RedirectToAction("Index", "Program");
+                }
+
+                // 4. Намиране на свободни места
+                var takenSeatIds = projection.Tickets?.Select(t => t.SeatId).ToList() ?? new List<int>();
+
+                var freeSeats = _context.Seats
+                    .Where(s => s.HallId == projection.HallId && !takenSeatIds.Contains(s.Id))
+                    .Select(s => new {
+                        Id = s.Id,
+                        DisplayName = $"Ред {s.Row}, Място {s.Number}"
+                    })
+                    .ToList();
+
+                // 5. Проверка за свободни места
+                if (!freeSeats.Any())
+                {
+                    TempData["Error"] = "Няма свободни места за тази прожекция.";
+                    return RedirectToAction("Index", "Program");
+                }
+
+                // 6. Подготовка на ViewBag
+                ViewBag.Projection = projection;
+                ViewBag.FreeSeats = new SelectList(freeSeats, "Id", "DisplayName");
+
+                // 7. Създаване на нов билет
+                var ticket = new Ticket
+                {
+                    ProjectionId = projection.Id,
+                    PricePaid = projection.TicketPrice
+                };
+
+                return View(ticket);
             }
-
-            var projection = _context.Projections
-                .Include(p => p.Movie)
-                .Include(p => p.Hall)
-                .Include(p => p.Tickets)
-                .FirstOrDefault(p => p.Id == projectionId);
-
-            if (projection == null)
+            catch (Exception ex)
             {
-                return NotFound();
-            }
-
-            // Проверка дали прожекцията е в бъдещето
-            if (projection.StartTime <= DateTime.Now)
-            {
-                TempData["Error"] = "Не можете да купувате билети за минали прожекции.";
+                // 8. При неочаквана грешка
+                TempData["Error"] = "Възникна грешка: " + ex.Message;
                 return RedirectToAction("Index", "Program");
             }
-
-            // Намираме свободните места
-            var takenSeatIds = projection.Tickets.Select(t => t.SeatId).ToList();
-            var freeSeats = _context.Seats
-                .Where(s => s.HallId == projection.HallId && !takenSeatIds.Contains(s.Id))
-                .Select(s => new {
-                    Id = s.Id,
-                    DisplayName = $"Ред {s.Row}, Място {s.Number}"
-                })
-                .ToList();
-
-            if (!freeSeats.Any())
-            {
-                TempData["Error"] = "Няма свободни места за тази прожекция.";
-                return RedirectToAction("Index", "Program");
-            }
-
-            ViewBag.Projection = projection;
-            ViewBag.FreeSeats = new SelectList(freeSeats, "Id", "DisplayName");
-
-            var ticket = new Ticket
-            {
-                ProjectionId = projection.Id,
-                PricePaid = projection.TicketPrice,
-                PurchasedAt = DateTime.Now
-            };
-
-            return View(ticket);
         }
 
         // POST: Tickets/Create
@@ -120,42 +136,53 @@ namespace MaxCinema.Controllers
         [Authorize]
         public async Task<IActionResult> Create([Bind("ProjectionId,SeatId,PricePaid")] Ticket ticket)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            ticket.UserId = userId;
-            ticket.PurchasedAt = DateTime.Now;
-
-            var seatTaken = _context.Tickets
-                .Any(t => t.ProjectionId == ticket.ProjectionId && t.SeatId == ticket.SeatId);
-
-            if (!seatTaken)
+            try
             {
-                _context.Add(ticket);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Билетът беше закупен успешно!";
-                return RedirectToAction(nameof(MyTickets));
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                ticket.UserId = userId;
+                ticket.PurchasedAt = DateTime.Now;
+
+                // Проверка дали мястото е свободно
+                var seatTaken = _context.Tickets
+                    .Any(t => t.ProjectionId == ticket.ProjectionId && t.SeatId == ticket.SeatId);
+
+                if (!seatTaken)
+                {
+                    _context.Add(ticket);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "✅ Билетът беше закупен успешно!";
+                    return RedirectToAction(nameof(MyTickets));
+                }
+
+                // Ако мястото е заето
+                ModelState.AddModelError("SeatId", "❌ Това място вече е заето! Моля, изберете друго.");
+
+                // Презареждане на данните
+                var projection = _context.Projections
+                    .Include(p => p.Movie)
+                    .Include(p => p.Hall)
+                    .Include(p => p.Tickets)
+                    .FirstOrDefault(p => p.Id == ticket.ProjectionId);
+
+                var takenSeatIds = projection.Tickets.Select(t => t.SeatId).ToList();
+                var freeSeats = _context.Seats
+                    .Where(s => s.HallId == projection.HallId && !takenSeatIds.Contains(s.Id))
+                    .Select(s => new {
+                        Id = s.Id,
+                        DisplayName = $"Ред {s.Row}, Място {s.Number}"
+                    })
+                    .ToList();
+
+                ViewBag.Projection = projection;
+                ViewBag.FreeSeats = new SelectList(freeSeats, "Id", "DisplayName", ticket.SeatId);
+
+                return View(ticket);
             }
-
-            ModelState.AddModelError("SeatId", "Това място вече е заето!");
-
-            var projection = _context.Projections
-                .Include(p => p.Movie)
-                .Include(p => p.Hall)
-                .Include(p => p.Tickets)
-                .FirstOrDefault(p => p.Id == ticket.ProjectionId);
-
-            var takenSeatIds = projection.Tickets.Select(t => t.SeatId).ToList();
-            var freeSeats = _context.Seats
-                .Where(s => s.HallId == projection.HallId && !takenSeatIds.Contains(s.Id))
-                .Select(s => new {
-                    Id = s.Id,
-                    DisplayName = $"Ред {s.Row}, Място {s.Number}"
-                })
-                .ToList();
-
-            ViewBag.Projection = projection;
-            ViewBag.FreeSeats = new SelectList(freeSeats, "Id", "DisplayName", ticket.SeatId);
-
-            return View(ticket);
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Грешка при запазване: " + ex.Message;
+                return RedirectToAction("Index", "Program");
+            }
         }
 
         // GET: Tickets/Details/5

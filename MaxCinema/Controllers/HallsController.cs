@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace MaxCinema.Controllers
 {
+
     [Authorize(Roles = "Admin")]
     public class HallsController : Controller
     {
@@ -154,6 +155,36 @@ namespace MaxCinema.Controllers
         private bool HallExists(int id)
         {
             return _context.Halls.Any(e => e.Id == id);
+        }
+    
+    public IActionResult GenerateSeeds()
+        {
+            var halls = _context.Halls.ToList();
+
+            foreach (var hall in halls)
+            {
+                for (int row = 1; row <= hall.TotalRows; row++)
+                {
+                    for (int seat = 1; seat <= hall.SeatsPerRow; seat++)
+                    {
+                        // Провери дали мястото вече съществува
+                        bool exists = _context.Seats.Any(s => s.HallId == hall.Id && s.Row == row && s.Number == seat);
+
+                        if (!exists)
+                        {
+                            _context.Seats.Add(new Seat
+                            {
+                                HallId = hall.Id,
+                                Row = row,
+                                Number = seat
+                            });
+                        }
+                    }
+                }
+            }
+
+            _context.SaveChanges();
+            return Content("Местата са създадени успешно!");
         }
     }
 }

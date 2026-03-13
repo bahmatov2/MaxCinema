@@ -1,36 +1,32 @@
 ﻿@model MaxCinema.Models.Hall
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Детайли за зала";
 }
 
-<h1>Details</h1>
+<h1>Детайли за зала</h1>
 
-<div>
-    <h4>Hall</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TotalRows)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TotalRows)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SeatsPerRow)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SeatsPerRow)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="card">
+    <div class="card-header">
+        <h3>@Model.Name</h3>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Име на зала:</dt>
+            <dd class="col-sm-9">@Model.Name</dd>
+
+            <dt class="col-sm-3">Брой редове:</dt>
+            <dd class="col-sm-9">@Model.TotalRows</dd>
+
+            <dt class="col-sm-3">Места на ред:</dt>
+            <dd class="col-sm-9">@Model.SeatsPerRow</dd>
+
+            <dt class="col-sm-3">Общо места:</dt>
+            <dd class="col-sm-9">@(Model.TotalRows* Model.SeatsPerRow)</dd>
+        </dl>
+    </div>
+    <div class="card-footer">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Редактирай</a>
+        <a asp-action="Index" class="btn btn-secondary">Назад</a>
+    </div>
 </div>

@@ -1,48 +1,41 @@
 ﻿@model MaxCinema.Models.Ticket
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Детайли за билет";
 }
 
-<h1>Details</h1>
+<h1>Детайли за билет</h1>
 
-<div>
-    <h4>Ticket</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Projection)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Projection.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Seat)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Seat.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PricePaid)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PricePaid)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PurchasedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PurchasedAt)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="card">
+    <div class="card-header bg-info text-white">
+        <h4>Билет #@Model.Id</h4>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Филм:</dt>
+            <dd class="col-sm-9">@Model.Projection?.Movie?.Title</dd>
+
+            <dt class="col-sm-3">Зала:</dt>
+            <dd class="col-sm-9">@Model.Projection?.Hall?.Name</dd>
+
+            <dt class="col-sm-3">Начало:</dt>
+            <dd class="col-sm-9">@Model.Projection?.StartTime.ToString("dd.MM.yyyy HH:mm")</dd>
+
+            <dt class="col-sm-3">Място:</dt>
+            <dd class="col-sm-9">Ред @Model.Seat?.Row, Място @Model.Seat?.Number</dd>
+
+            <dt class="col-sm-3">Потребител:</dt>
+            <dd class="col-sm-9">@Model.User?.Email</dd>
+
+            <dt class="col-sm-3">Цена:</dt>
+            <dd class="col-sm-9">@Model.PricePaid.ToString("F2") €</dd>
+
+            <dt class="col-sm-3">Закупен на:</dt>
+            <dd class="col-sm-9">@Model.PurchasedAt.ToString("dd.MM.yyyy HH:mm")</dd>
+        </dl>
+    </div>
+    <div class="card-footer">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Редактирай</a>
+        <a asp-action="Index" class="btn btn-secondary">Назад</a>
+    </div>
 </div>

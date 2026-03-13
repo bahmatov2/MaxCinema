@@ -34,12 +34,26 @@
 
                     <div class="form-group mb-3">
                         <label asp-for="SeatId" class="control-label">Избери място</label>
-                        <select asp-for="SeatId" class="form-control" asp-items="ViewBag.FreeSeats">
-                            <option value="">-- Изберете място --</option>
-                        </select>
+
+                        @if (ViewBag.FreeSeats != null && ((SelectList)ViewBag.FreeSeats).Count() > 0)
+                        {
+                            <select asp-for="SeatId" class="form-control" asp-items="ViewBag.FreeSeats">
+                                <option value="">-- Изберете място --</option>
+                            </select>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Няма свободни места за тази прожекция.
+                            </div>
+                        }
                     </div>
 
-                    <button type="submit" class="btn btn-success">Купи билет</button>
+                    @if (ViewBag.FreeSeats != null && ((SelectList)ViewBag.FreeSeats).Count() > 0)
+                    {
+                        <button type="submit" class="btn btn-success">Купи билет</button>
+                    }
                     <a asp-controller="Program" asp-action="Index" class="btn btn-secondary">Назад</a>
                 </form>
             </div>

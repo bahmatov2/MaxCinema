@@ -18,7 +18,7 @@ namespace MaxCinema.Data
                     await roleManager.CreateAsync(new IdentityRole(role));
             }
 
-            
+
             const string adminEmail = "admin@maxcinema.com";
             if (await userManager.FindByEmailAsync(adminEmail) == null)
             {
@@ -34,6 +34,32 @@ namespace MaxCinema.Data
                 await userManager.CreateAsync(admin, "Admin123!");
                 await userManager.AddToRoleAsync(admin, Roles.Admin);
             }
+        }
+        public static async Task SeedSeatsAsync(IServiceProvider services)
+        {
+            var context = services.GetRequiredService<ApplicationDbContext>();
+
+            // Ако вече има места — не правим нищо
+            if (context.Seats.Any()) return;
+
+            var halls = context.Halls.ToList();
+
+            foreach (var hall in halls)
+            {
+                for (int row = 1; row <= hall.TotalRows; row++)
+                {
+                    for (int seat = 1; seat <= hall.SeatsPerRow; seat++)
+                    {
+                        context.Seats.Add(new Seat
+                        {
+                            HallId = hall.Id,
+                            Row = row,
+                            Number = seat
+                        });
+                    }
+                }
+            }
+            await context.SaveChangesAsync();
         }
     }
 }

@@ -156,8 +156,8 @@ namespace MaxCinema.Controllers
         {
             return _context.Halls.Any(e => e.Id == id);
         }
-    
-    public IActionResult GenerateSeeds()
+
+        public IActionResult GenerateSeeds()
         {
             var halls = _context.Halls.ToList();
 

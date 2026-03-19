@@ -39,7 +39,7 @@ namespace MaxCinema.Data
         {
             var context = services.GetRequiredService<ApplicationDbContext>();
 
-            // Ако вече има места — не правим нищо
+            
             if (context.Seats.Any()) return;
 
             var halls = context.Halls.ToList();

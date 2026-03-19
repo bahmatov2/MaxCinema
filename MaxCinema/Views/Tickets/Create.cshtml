@@ -3,14 +3,17 @@
 @{
     ViewData["Title"] = "Купи билет";
     var projection = ViewBag.Projection as MaxCinema.Models.Projection;
+    var allSeats = ViewBag.AllSeats as List<MaxCinema.Models.Seat>;
+    var freeSeatIds = ViewBag.FreeSeatIds as List<int>;
 }
 
 <h1>Купи билет за @projection?.Movie?.Title</h1>
 
 <div class="row">
-    <div class="col-md-6">
-        <!-- Информация за прожекцията -->
-        <div class="card mb-3">
+    <div class="col-md-8">
+
+        
+        <div class="hall-map mb-3 text-center">
             <div class="card-header bg-primary text-white">
                 <h4>Информация за прожекцията</h4>
             </div>
@@ -22,41 +25,82 @@
             </div>
         </div>
 
-        <!-- Форма за избор на място -->
-        <div class="card">
-            <div class="card-header bg-success text-white">
-                <h4>Избор на място</h4>
-            </div>
-            <div class="card-body">
-                <form asp-action="Create" method="post">
-                    <input type="hidden" asp-for="ProjectionId" />
-                    <input type="hidden" asp-for="PricePaid" />
-
-                    <div class="form-group mb-3">
-                        <label asp-for="SeatId" class="control-label">Избери място</label>
-
-                        @if (ViewBag.FreeSeats != null && ((SelectList)ViewBag.FreeSeats).Count() > 0)
-                        {
-                            <select asp-for="SeatId" class="form-control" asp-items="ViewBag.FreeSeats">
-                                <option value="">-- Изберете място --</option>
-                            </select>
-                        }
-                        else
-                        {
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                Няма свободни места за тази прожекция.
-                            </div>
-                        }
-                    </div>
-
-                    @if (ViewBag.FreeSeats != null && ((SelectList)ViewBag.FreeSeats).Count() > 0)
-                    {
-                        <button type="submit" class="btn btn-success">Купи билет</button>
-                    }
-                    <a asp-controller="Program" asp-action="Index" class="btn btn-secondary">Назад</a>
-                </form>
-            </div>
+        
+        <div class="d-flex gap-3 mb-3">
+            <span><span style="color:#28a745; font-size:20px;">&#9632;</span> Свободно</span>
+            <span><span style="color:#6c757d; font-size:20px;">&#9632;</span> Заето</span>
+            <span><span style="color:#007bff; font-size:20px;">&#9632;</span> Избрано</span>
         </div>
+
+       
+        <div class="screen mb-4">🎬 ЕКРАН</div>
+
+       
+        <form asp-action="Create" method="post" id="seatForm">
+            <input type="hidden" asp-for="ProjectionId" />
+            <input type="hidden" asp-for="PricePaid" />
+            <input type="hidden" asp-for="SeatId" id="selectedSeatId" />
+
+           
+            <div class="hall-map mb-3">
+                @if (allSeats != null)
+                {
+                    var rows = allSeats.Select(s => s.Row).Distinct().OrderBy(r => r);
+                    foreach (var row in rows)
+                    {
+                        <div class="seat-row">
+                            <span class="row-label">@row</span>
+                            @foreach (var seat in allSeats.Where(s => s.Row == row).OrderBy(s => s.Number))
+                            {
+                                var isFree = freeSeatIds != null && freeSeatIds.Contains(seat.Id);
+                                <button type="button"
+                                        class="seat @(isFree ? "free" : "taken")"
+                                        data-seat-id="@seat.Id"
+                                        data-row="@seat.Row"
+                                        data-number="@seat.Number"
+                                    @(isFree ? "" : "disabled")
+                                        title="Ред @seat.Row, Място @seat.Number">
+                                    @seat.Number
+                                </button>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+
+            <div id="selectedInfo" class="alert alert-info d-none mb-3">
+                Избрано: <strong id="selectedText"></strong>
+            </div>
+
+            <button type="submit" class="btn btn-success" id="buyBtn" disabled>
+                 Купи билет
+            </button>
+            <a asp-controller="Program" asp-action="Index" class="btn btn-secondary ms-2">Назад</a>
+        </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.seat.free').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                
+                document.querySelectorAll('.seat.selected').forEach(function(s) {
+                    s.classList.remove('selected');
+                    s.classList.add('free');
+                });
+
+               
+                this.classList.remove('free');
+                this.classList.add('selected');
+
+                
+                document.getElementById('selectedSeatId').value = this.dataset.seatId;
+                document.getElementById('selectedText').textContent =
+                    'Ред ' + this.dataset.row + ', Място ' + this.dataset.number;
+                document.getElementById('selectedInfo').classList.remove('d-none');
+                document.getElementById('buyBtn').disabled = false;
+            });
+        });
+    </script>
+}

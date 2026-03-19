@@ -17,6 +17,7 @@
             <th>Място</th>
             <th>Цена</th>
             <th>Закупен на</th>
+            <th>Действия</th>
         </tr>
     </thead>
     <tbody>
@@ -31,6 +32,15 @@
                 <td>@item.Seat?.Number</td>
                 <td>@item.PricePaid.ToString("F2") €</td>
                 <td>@item.PurchasedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>
+                    <form asp-action="DeleteConfirmed" asp-route-id="@item.Id" method="post"
+                          onsubmit="return confirm('Сигурни ли сте, че искате да изтриете този билет?')">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            Изтрий
+                        </button>
+                    </form>
+                </td>
             </tr>
         }
     </tbody>
